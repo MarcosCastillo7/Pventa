@@ -1,0 +1,23 @@
+npm init --yes
+npm i express express-handlebars express-session mysql express-mysql-session morgan bcryptjs passport passport-local timeago.js connect-flash express-validator
+npm i nodemon -D
+
+
+
+
+
+
+
+
+
+//add.handlebars
+mx-auto = para centrar la tarjera
+autofocus = para posicionar el puntero en el imput
+
+
+// links/routes
+
+los datos los recibimos atraves del objeto (req.body) para ver que datos nos esta enviando el formulario
+
+//handlebars
+target= "_blank" = para abrir en otra pestaña
