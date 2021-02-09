@@ -1,0 +1,163 @@
+<div class="container col-md-6" style="padding-top: 20px;">
+    <div class="card">
+        <form class="col" style="padding-top:30px;">
+            <div class="form-group row">
+                <div class="col">
+                    <input type="text" name="nit" placeholder="NIT" class="form-control">
+                </div>
+                <div class="col-md-8">
+                    <input type="text" name="nombre" placeholder="Nombre" class="form-control">
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="search" id="buscar" list="productos" placeholder="Producto" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <input type="number" id="cantidad" placeholder="Cantidad" min="0" max="50" class="form-control">
+                </div>
+                <div class="col">
+                    <input id="agregar" type="button" value="Agregar" class="btn btn-primary btn-block">
+                </div>
+            </div>
+
+            <datalist id="productos">
+            </datalist>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="registros">
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <th class="text-center" colspan="4">Total</th>
+                            <td class="text-right">
+                                <label id="total">0</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="5">
+                                <input type="button" value="Guardar" id="guardar" class="btn btn-block btn-success">
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+var factura;
+var detalle = [];
+var productos = document.getElementById('productos');
+var seleccionado;
+var fila;
+var total = 0;
+var listado = [];
+var cadena = "";
+
+verProductos();
+
+async function verProductos() {
+    let res = await fetch('/ventas/productos');
+    listado = await res.json();
+
+    listado.forEach((item, i, ar) => {
+        cadena += `<option data-name="${i}"  value="${item.title}" />`;
+    })
+
+    //Agrega todos los productos para que los puedan ver desde el cuadro de busqueda
+    productos.innerHTML = cadena;
+}
+
+$('#buscar').on('input', () => {
+    let val = $('#buscar').val();
+    console.log("valor:", val);
+    seleccionado = $('#productos').find(`option[value="${val}"]`).data('name');
+    $('#cantidad').attr('max', listado[seleccionado].unidades);
+})
+
+$('#agregar').click((e) => {
+    e.preventDefault();
+    let cantidad = $('#cantidad').val();
+    let subtotal = cantidad * listado[seleccionado].precio_venta;
+
+    total = parseFloat($('#total').text());
+    total = parseFloat(total + subtotal);
+    $('#total').text(total);
+
+    let registro = {
+        "id": listado[seleccionado].id,
+        "title": listado[seleccionado].title,
+        "cantidad": cantidad,
+        "description": listado[seleccionado].description,
+        "precio": listado[seleccionado].precio_venta,
+        "subtotal": subtotal
+    }
+
+    detalle.push(registro);
+    limpiarCampos();
+
+    $('#registros').append(`
+    <tr>
+    <td>${listado[seleccionado].title}</td>
+    <td class="text-right">${cantidad}</td>
+    <td>${listado[seleccionado].description}</td>
+    <td class="text-right">${listado[seleccionado].precio_venta}</td>
+    <td class="text-right">${subtotal}</td>
+    <td class="btn btn-danger" id="eliminar">x</td>
+    </tr>`);
+})
+
+$('#guardar').click(async function () {
+    url = "/ventas/factura";
+    factura = {
+        cliente: $("input[name='nombre']").val(),
+        nit: $("input[name='nit']").val(),
+        total,
+        detalle
+    }
+
+    $('#registros').text('');
+
+    await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        redirect: 'follow',
+        body: JSON.stringify(factura)
+    });
+
+    window.location.assign('/ventas/factura');
+})
+
+function limpiarCampos() {
+    $('#cantidad').val('');
+    $('#buscar').val('');
+}
+
+$(document).on('click', '#eliminar', function (e) {
+    e.preventDefault();
+
+    fila = $(this).closest('tr').index();
+    $(this).closest('tr').remove();
+
+    total -= detalle[fila].subtotal;
+    detalle.splice(fila, 1);
+    $('#total').text(total);
+})
+</script>
