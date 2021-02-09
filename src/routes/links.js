@@ -9,18 +9,18 @@ router.get('/add', isLoggedIn, (req,res)=>{
 });
 
 router.post('/add', isLoggedIn, async (req, res)=>{
-    const { title, url, unidades, Precio_costo, Precio_venta, description} = req.body;
+    const { title, unidades, precio_costo, precio_venta, description} = req.body;
     
     const newLink= {
         title,
         url,
         unidades,
-        Precio_costo, 
-        Precio_venta,
+        precio_costo, 
+        precio_venta,
         description,
         user_id: req.user.id
     };
-    await pool.query('INSERT INTO Links set ?', [newLink]);
+    await pool.query('INSERT INTO producto set ?', [newLink]);
     console.log(newLink);
     req.flash('success', 'guardado correctamente');
     res.redirect('/links');
@@ -30,20 +30,20 @@ router.post('/add', isLoggedIn, async (req, res)=>{
 
 
 router.get('/', isLoggedIn, async(req, res)=>{
-    const links = await pool.query('SELECT * FROM links WHERE user_id = ?', [req.user.id]);
+    const links = await pool.query('SELECT * FROM producto WHERE user_id = ?', [req.user.id]);
     console.log(links);
     res.render('links/list', {links});
 });
 
 router.get('/allLinks', isLoggedIn, async(req, res)=>{
-    const links = await pool.query('SELECT * FROM links');
+    const links = await pool.query('SELECT * FROM producto');
     console.log(links);
     res.render('links/list', {links});
 });
 
 router.get('/delete/:id', isLoggedIn, async(req, res) =>{
     const {id} = req.params;
- await pool.query('DELETE FROM links WHERE ID = ?', [id]);
+ await pool.query('DELETE FROM producto WHERE ID = ?', [id]);
  req.flash('success', 'Se ha eliminado correctamente');
 res.redirect('/links');
 
@@ -51,12 +51,11 @@ res.redirect('/links');
 var prueba = '';
 router.get('/edit/:id', isLoggedIn, async (req, res) =>{
     const {id} = req.params;
-    const links = await pool.query('SELECT * FROM links WHERE id = ?', [id]);
-   console.log(links[0]);
-   prueba = links[0].title;
-   res.render('links/edit', {link: links[0]});                                                
+    const  venta = await pool.query('SELECT * FROM ventas WHERE id = ? limit 1', [id]);
+   console.log("Ventas : ",venta);
+   prueba = venta[0].title;
+   res.render('links/edit', {link: venta[0]});                                                
 });
-
 
 router.post('/edit/:id', isLoggedIn, async (req, res) =>{
     const {id} = req.params;

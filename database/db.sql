@@ -1,7 +1,4 @@
-
-
- //////
- Create database database_links;
+Create database database_links;
 use database_links;
 
 Create table users(
@@ -17,18 +14,17 @@ alter table users
  alter table users
  modify id int(11) not null auto_increment;
 
- Create table links (
+ Create table producto (
      id int(11) not null PRIMARY key auto_increment,
      title varchar(150) not null,
-     url varchar(255) not null,
      unidades int,
-       Precio_costo int,
-     Precio_venta int,
+     precio_costo int,
+     precio_venta int,
      description text,
      user_id int(11),
      created_at timestamp not null default current_timestamp,
      constraint fk_user foreign key (user_id) references users(id)
-     );
+);
  
  
  Create table ventas (
