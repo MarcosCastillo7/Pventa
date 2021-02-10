@@ -1,12 +1,9 @@
 const express = require('express');
-const { route } = require('./links');
 const router = express.Router();
-
 const pool = require('../database');
 const { isLoggedIn } = require('../lib/auth');
 
 router.get('/factura', isLoggedIn, async (req, res) => {
-    console.log("FACTURAS");
     res.render('ventas/factura');
 })
 
@@ -63,53 +60,19 @@ let quitarProducto = (detalle, idVenta) => {
 
 router.get('/productos', isLoggedIn, async (req, res) => {
     const productos = await pool.query('SELECT id, title, unidades, precio_venta,description FROM producto WHERE unidades>0');
-
-    console.log("productos: ", productos);
     res.json(productos);
 })
 
-router.get('/venta', isLoggedIn, (req, res) => {
-    res.render('ventas/venta');
-});
-
-
-router.post('/venta', isLoggedIn, async (req, res) => {
-
-    const { cliente, cantidad, description } = req.body;
-
-    const newLink = {
-        cliente,
-        cantidad,
-        description,
-        user_id: req.user.id
-    };
-    await pool.query('INSERT INTO ventas set ?', [newLink]);
-    // console.log(newLink);
-
-    req.flash('success', 'guardado correctamente');
-    res.redirect('/ventas');
-});
-
-var prueba = '';
 router.get('/', isLoggedIn, async (req, res) => {
-    const { cliente } = req.params;
-    // const li= {
-    //     title,
-    //     url,
-    //     user_id: req.user.id
-    // }
-    const ventas = await pool.query('SELECT * FROM ventas WHERE user_id = ?', [req.user.id]);
-    // const links = await pool.query('SELECT * FROM links WHERE user_id = ?', [req.user.id]);
-    const links = await pool.query('SELECT * FROM producto');
-    // console.log(ventas);
-    // prueba = links[0];
-    const unir = { ...ventas, ...links };
-    // const b= Object.assign(ventas,links);
-    // ventas[1][1] =links[0];
+    const ventas = await pool.query('select * from ventas order by created_at desc');
+    const response= await pool.query('select sum(total) as total from ventas');
 
-    console.log(unir);
-    res.render('ventas/ListVentas', { links, ventas });
+    res.render('ventas/ListVentas', { ventas,'total': response[0].total});
 });
 
+router.get('/:id',isLoggedIn, async(req,res)=>{
+    const detalle= await pool.query('Select * from detalle where venta_id=?',req.params.id);
+    res.render('ventas/detalle',{detalle});
+})
 
-module.exports = router;
+module.exports = router

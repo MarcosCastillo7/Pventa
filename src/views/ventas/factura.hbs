@@ -10,7 +10,7 @@
                 </div>
             </div>
             <br>
-            <div class="row">
+            <div class="form-group row">
                 <div class="col-md-6">
                     <input type="search" id="buscar" list="productos" placeholder="Producto" class="form-control">
                 </div>
@@ -60,58 +60,58 @@
 </div>
 
 <script>
-var factura;
-var detalle = [];
-var productos = document.getElementById('productos');
-var seleccionado;
-var fila;
-var total = 0;
-var listado = [];
-var cadena = "";
+    var factura;
+    var detalle = [];
+    var productos = document.getElementById('productos');
+    var seleccionado;
+    var fila;
+    var total = 0;
+    var listado = [];
+    var cadena = "";
 
-verProductos();
+    verProductos();
 
-async function verProductos() {
-    let res = await fetch('/ventas/productos');
-    listado = await res.json();
+    async function verProductos() {
+        let res = await fetch('/ventas/productos');
+        listado = await res.json();
 
-    listado.forEach((item, i, ar) => {
-        cadena += `<option data-name="${i}"  value="${item.title}" />`;
-    })
+        listado.forEach((item, i) => {
+            cadena += `<option data-name="${i}"  value="${item.title}" />`;
+        })
 
-    //Agrega todos los productos para que los puedan ver desde el cuadro de busqueda
-    productos.innerHTML = cadena;
-}
-
-$('#buscar').on('input', () => {
-    let val = $('#buscar').val();
-    console.log("valor:", val);
-    seleccionado = $('#productos').find(`option[value="${val}"]`).data('name');
-    $('#cantidad').attr('max', listado[seleccionado].unidades);
-})
-
-$('#agregar').click((e) => {
-    e.preventDefault();
-    let cantidad = $('#cantidad').val();
-    let subtotal = cantidad * listado[seleccionado].precio_venta;
-
-    total = parseFloat($('#total').text());
-    total = parseFloat(total + subtotal);
-    $('#total').text(total);
-
-    let registro = {
-        "id": listado[seleccionado].id,
-        "title": listado[seleccionado].title,
-        "cantidad": cantidad,
-        "description": listado[seleccionado].description,
-        "precio": listado[seleccionado].precio_venta,
-        "subtotal": subtotal
+        //Agrega todos los productos para que los puedan ver desde el cuadro de busqueda
+        productos.innerHTML = cadena;
     }
 
-    detalle.push(registro);
-    limpiarCampos();
+    $('#buscar').on('input', () => {
+        let val = $('#buscar').val();
+        console.log("valor:", val);
+        seleccionado = $('#productos').find(`option[value="${val}"]`).data('name');
+        $('#cantidad').attr('max', listado[seleccionado].unidades);
+    })
 
-    $('#registros').append(`
+    $('#agregar').click((e) => {
+        e.preventDefault();
+        let cantidad = $('#cantidad').val();
+        let subtotal = cantidad * listado[seleccionado].precio_venta;
+
+        total = parseFloat($('#total').text());
+        total = parseFloat(total + subtotal);
+        $('#total').text(total);
+
+        let registro = {
+            "id": listado[seleccionado].id,
+            "title": listado[seleccionado].title,
+            "cantidad": cantidad,
+            "description": listado[seleccionado].description,
+            "precio": listado[seleccionado].precio_venta,
+            "subtotal": subtotal
+        }
+
+        detalle.push(registro);
+        limpiarCampos();
+
+        $('#registros').append(`
     <tr>
     <td>${listado[seleccionado].title}</td>
     <td class="text-right">${cantidad}</td>
@@ -120,44 +120,44 @@ $('#agregar').click((e) => {
     <td class="text-right">${subtotal}</td>
     <td class="btn btn-danger" id="eliminar">x</td>
     </tr>`);
-})
+    })
 
-$('#guardar').click(async function () {
-    url = "/ventas/factura";
-    factura = {
-        cliente: $("input[name='nombre']").val(),
-        nit: $("input[name='nit']").val(),
-        total,
-        detalle
+    $('#guardar').click(async function () {
+        url = "/ventas/factura";
+        factura = {
+            cliente: $("input[name='nombre']").val(),
+            nit: $("input[name='nit']").val(),
+            total,
+            detalle
+        }
+
+        $('#registros').text('');
+
+        await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow',
+            body: JSON.stringify(factura)
+        });
+
+        window.location.assign('/ventas/factura');
+    })
+
+    function limpiarCampos() {
+        $('#cantidad').val('');
+        $('#buscar').val('');
     }
 
-    $('#registros').text('');
+    $(document).on('click', '#eliminar', function (e) {
+        e.preventDefault();
 
-    await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        redirect: 'follow',
-        body: JSON.stringify(factura)
-    });
+        fila = $(this).closest('tr').index();
+        $(this).closest('tr').remove();
 
-    window.location.assign('/ventas/factura');
-})
-
-function limpiarCampos() {
-    $('#cantidad').val('');
-    $('#buscar').val('');
-}
-
-$(document).on('click', '#eliminar', function (e) {
-    e.preventDefault();
-
-    fila = $(this).closest('tr').index();
-    $(this).closest('tr').remove();
-
-    total -= detalle[fila].subtotal;
-    detalle.splice(fila, 1);
-    $('#total').text(total);
-})
+        total -= detalle[fila].subtotal;
+        detalle.splice(fila, 1);
+        $('#total').text(total);
+    })
 </script>
