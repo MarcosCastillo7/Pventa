@@ -1,8 +1,41 @@
 <div class="container p-4">
     <div class="row">
 
-        {{#each links}}
-            <div class="col-md-3">
+        {{!-- {{#each links}} --}}
+<h1>Inventario</h1>
+ <div class="col-md-6">
+                    <input type="search" id="buscar" list="productos" placeholder="Buscar" class="form-control" align="center"> 
+                </div>
+        <table border="2" cellspacing="0">
+    
+    <thead></thead>
+      {{!-- <caption>Productos Comprados</caption>   --}}
+
+    <tr align="center" bgcolor="yellow">
+        <th width="200">Titulo</th>
+        <th width="200">cantidad</th>
+        <th width="200">description</th>
+        <th width="200">Precio</th>
+        <th colspan="6">Opciones</th>
+    </tr>
+   {{#each links}} 
+    <tr align="center">
+        <td >{{title}}</td>
+        <td >{{unidades}}</td>
+        <td >{{description}}</td>
+        <td >Q{{Precio_venta}}</td>
+        <td > <a href="/links/delete/{{id}}" class="btn btn-danger"> Delete</a></td>
+        <td > <a href="/links/edit/{{id}}" class="btn btn-secondary">Edit</a> </td>
+        <td> <a href="/links/ingreso/{{id}}" class="btn btn-success">+</a></td>
+        <td> <a href="/links/egreso/{{id}}" class="btn btn-danger">-</a></td>
+        <td>  <a href="/links/edit/{{id}}" class="btn btn-info">Detalles</a></td>
+        <td>  <a href="/links/registro/{{id}}" class="btn btn-dark">Registro</a></td>
+    </tr>
+     
+    
+
+
+            {{!-- <div class="col-md-3">
                 <div class="card text-center">
                      <div class="card-body">
                         <a href="{{url}}" target= "_blank">
@@ -15,10 +48,12 @@
                         <p>{{timeago created_at}}</p>
                         <a href="/links/delete/{{id}}" class="btn btn-danger"> Delete</a>
                         <a href="/links/edit/{{id}}" class="btn btn-secondary">Edit</a>
+                        <a href="/links/edit/{{id}}" class="btn btn-success">+</a>
+                        <a href="/links/edit/{{id}}" class="btn btn-info">Detalles</a>
                      </div>
                 </div>
             </div>
-            
+             --}}
             {{else}}
             <div class="col md-4 mx-auto">
                 <div class="card card-body text-center">
@@ -27,7 +62,40 @@
                 </div>
             </div>
         {{/each}}  
-       
+       </table>
     </div>
      <a href="/links/add" class="btn btn-success ">añadir</a>  
 </div>
+
+
+<script>
+    var factura;
+    var detalle = [];
+    var productos = document.getElementById('productos');
+    var seleccionado;
+    var fila;
+    var total = 0;
+    var listado = [];
+    var cadena = "";
+
+    verProductos();
+
+    async function verProductos() {
+        let res = await fetch('/ventas/productos');
+        listado = await res.json();
+
+        listado.forEach((item, i) => {
+            cadena += `<option data-name="${i}"  value="${item.title}" />`;
+        })
+
+        //Agrega todos los productos para que los puedan ver desde el cuadro de busqueda
+        productos.innerHTML = cadena;
+    }
+
+    $('#buscar').on('input', () => {
+        let val = $('#buscar').val();
+        console.log("valor:", val);
+        seleccionado = $('#productos').find(`option[value="${val}"]`).data('name');
+        $('#cantidad').attr('max', listado[seleccionado].unidades); 
+    })
+     </script>
