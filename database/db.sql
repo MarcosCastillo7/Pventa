@@ -26,14 +26,26 @@ alter table users
      constraint fk_user foreign key (user_id) references users(id)
 );
  
- 
+
  Create table ventas (
      id int(11) not null PRIMARY key auto_increment,
+     user_id int,
      cliente varchar(150) not null,
-     cantidad varchar(255) not null,
-     description text,
-     user_id int(11),
+     nit varchar(255) not null,
+     total float,
      created_at timestamp not null default current_timestamp,
-     constraint fk_user2 foreign key (user_id) references users(id)
-     );
- 
+     constraint fk_user foreign key (user_id) references users(id)     
+); 
+
+
+CREATE TABLE detalle (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    venta_id INT NOT NULL,
+    CONSTRAINT fk_venta FOREIGN KEY (venta_id)
+        REFERENCES ventas (id),
+    title VARCHAR(150) NOT NULL,
+    cantidad INT,
+    description TEXT,
+    precio FLOAT,
+    subtotal FLOAT
+);
