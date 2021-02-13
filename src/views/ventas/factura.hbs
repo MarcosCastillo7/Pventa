@@ -1,4 +1,7 @@
-<div class="container col-md-6" style="padding-top: 20px;">
+<a href="/profile" class="btn btn-danger border-dark">Regresar</a>
+<div id="message">
+</div>
+<div class="container col-6" style="padding-top: 20px;">
     <div class="card">
         <form class="col" style="padding-top:30px;">
             <div class="form-group row">
@@ -71,18 +74,6 @@
 
     verProductos();
 
-    async function verProductos() {
-        let res = await fetch('/ventas/productos');
-        listado = await res.json();
-
-        listado.forEach((item, i) => {
-            cadena += `<option data-name="${i}"  value="${item.title}" />`;
-        })
-
-        //Agrega todos los productos para que los puedan ver desde el cuadro de busqueda
-        productos.innerHTML = cadena;
-    }
-
     $('#buscar').on('input', () => {
         let val = $('#buscar').val();
         console.log("valor:", val);
@@ -90,9 +81,48 @@
         $('#cantidad').attr('max', listado[seleccionado].unidades);
     })
 
+
+    async function verProductos() {
+        let res = await fetch('/ventas/productos');
+        listado = await res.json();
+
+        listado.forEach((item, i) => {
+            cadena += `<option data-name="${i}"  value="${item.title}" class="sel" />`;
+        })
+
+        //Agrega todos los productos para que los puedan ver desde el cuadro de busqueda
+        productos.innerHTML = cadena;
+    }
+
+    function message(cadena) {
+        let mensaje = `<div class="row">
+                        <div class="col-md-4 mx-auto">
+                            <div class="alert alert-danger alert-dismissible fade show " role="alert">
+                                ${cadena}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                                    <span aria-hidden="true">&times;</span>
+                               </button>
+                            </div>
+                        </div>
+                    </div>`;
+        return mensaje;
+    }
+
     $('#agregar').click((e) => {
         e.preventDefault();
+
+        if (seleccionado === undefined) {
+            limpiarCampos();
+            $('#message').append(message('Seleccione producto'));
+            return;
+        }
+
         let cantidad = $('#cantidad').val();
+        if (cantidad > listado[seleccionado].unidades) {
+            limpiarCampos();
+            $('#message').append(message('Excedió el limite de unidades'));
+            return;
+        }
         let subtotal = cantidad * listado[seleccionado].precio_venta;
 
         total = parseFloat($('#total').text());
@@ -112,14 +142,14 @@
         limpiarCampos();
 
         $('#registros').append(`
-    <tr>
-    <td>${listado[seleccionado].title}</td>
-    <td class="text-right">${cantidad}</td>
-    <td>${listado[seleccionado].description}</td>
-    <td class="text-right">${listado[seleccionado].precio_venta}</td>
-    <td class="text-right">${subtotal}</td>
-    <td class="btn btn-danger" id="eliminar">x</td>
-    </tr>`);
+        <tr>
+            <td>${registro.title}</td>
+            <td class="text-right">${registro.cantidad}</td>
+            <td>${registro.description}</td>
+            <td class="text-right">${registro.precio}</td>
+            <td class="text-right">${registro.subtotal}</td>
+            <td class="btn btn-danger" id="eliminar">x</td>
+        </tr>`);
     })
 
     $('#guardar').click(async function () {
@@ -132,6 +162,7 @@
         }
 
         $('#registros').text('');
+        $('#total').text('0');
 
         await fetch(url, {
             method: 'POST',
@@ -148,6 +179,7 @@
     function limpiarCampos() {
         $('#cantidad').val('');
         $('#buscar').val('');
+        seleccionado = undefined;
     }
 
     $(document).on('click', '#eliminar', function (e) {

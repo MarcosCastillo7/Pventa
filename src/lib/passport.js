@@ -14,9 +14,8 @@ passport.use('local.signin', new LocalStrategy({
    const rows = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
    if (rows.length > 0) {
       const user = rows[0];
-      //   const validPassword = await helpers.logueo(password, user.password);
-      const validPassword = await (password, user.password);
-      if (validPassword) {
+      
+      if (password === user.password) {
          done(null, user, req.flash('success', 'Welcome' + " " + user.username));
       } else {
          done(null, false, req.flash('message', 'incorrect password'));
