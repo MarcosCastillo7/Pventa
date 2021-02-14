@@ -153,6 +153,10 @@
     })
 
     $('#guardar').click(async function () {
+        if($("input[name='nombre").val()==="" || $("input[name='nit']").val()===""){
+            $("#message").append(message('Ingrese información del cliente'));
+            return
+        }
         url = "/ventas/factura";
         factura = {
             cliente: $("input[name='nombre']").val(),

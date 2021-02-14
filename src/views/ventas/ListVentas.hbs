@@ -1,31 +1,30 @@
 <a href="/profile" class="btn btn-danger border-dark">Regresar</a>
-<div class="container">
-    <div class="card">
-        <h1 style="text-align: center;">Ventas</h1>
+<div class="container card" style="overflow: scroll; height:500px; width:100%">
+    <h1 style="text-align: center;">Ventas</h1>
+    <div class="row">
         <h2 class="bg-danger col-3" style="text-align: center;">Total: Q. {{total}}</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Cliente</th>
-                        <th>Nit</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each ventas}}
-                    <tr>
-                        <td>{{timeago created_at}}</td>
-                        <td>{{cliente}}</td>
-                        <td>{{nit}}</td>
-                        <td>Q {{total}}</td>
-                        <td class="p-0"><a href="/ventas/{{id}}" class="btn btn-info btn-block" id="mostrar">Detalle</a>
-                        </td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        </div>
     </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Nit</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each ventas}}
+            <tr>
+                <td>{{timeago created_at}}</td>
+                <td>{{cliente}}</td>
+                <td>{{nit}}</td>
+                <td>Q {{total}}</td>
+                <td class="p-0"><a href="/ventas/{{id}}" class="btn btn-info btn-block" id="mostrar">Detalle</a>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
 </div>
