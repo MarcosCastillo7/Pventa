@@ -1,0 +1,207 @@
+<a href="/profile" class="btn btn-danger border-dark">Regresar</a>
+<div id="message">
+</div>
+
+ <style>
+     
+    #scroll{
+       width:70%;
+    height:600px;
+        overflow:scroll;
+      
+}
+    }
+    </style>
+<div class="container col-6" id="scroll" style="padding-top: 20px;">
+    <div class="card">
+        <h3 align="center">Nueva Venta</h3>
+        <form class="col" style="padding-top:30px;">
+            <div class="form-group row">
+                <div class="col">
+                    <input type="text" name="nit" placeholder="NIT" class="form-control">
+                </div>
+                <div class="col-md-8">
+                    <input type="text" name="nombre" placeholder="Nombre" class="form-control">
+                </div>
+            </div>
+            <br>
+            <div class="form-group row">
+                <div class="col-md-6">
+                    <input type="search" id="buscar" list="productos" placeholder="Producto" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <input type="number" id="cantidad" placeholder="Cantidad" min="0" max="50" class="form-control">
+                </div>
+                <div class="col">
+                    <input id="agregar" type="button" value="Agregar" class="btn btn-primary btn-block">
+                </div>
+            </div>
+
+            <datalist id="productos">
+            </datalist>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="registros">
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <th class="text-center" colspan="4">Total</th>
+                            <td class="text-right">
+                                <label id="total">0</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="5">
+                                <input type="button" value="Guardar" id="guardar" class="btn btn-block btn-success">
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    var factura;
+    var detalle = [];
+    var productos = document.getElementById('productos');
+    var seleccionado;
+    var fila;
+    var total = 0;
+    var listado = [];
+    var cadena = "";
+
+    verProductos();
+
+    $('#buscar').on('input', () => {
+        let val = $('#buscar').val();
+        console.log("valor:", val);
+        seleccionado = $('#productos').find(`option[value="${val}"]`).data('name');
+        $('#cantidad').attr('max', listado[seleccionado].unidades);
+    })
+
+
+    async function verProductos() {
+        let res = await fetch('/ventas/productos');
+        listado = await res.json();
+
+        listado.forEach((item, i) => {
+            cadena += `<option data-name="${i}"  value="${item.title}" class="sel" />`;
+        })
+
+        //Agrega todos los productos para que los puedan ver desde el cuadro de busqueda
+        productos.innerHTML = cadena;
+    }
+
+    function message(cadena) {
+        let mensaje = `<div class="row">
+                        <div class="col-md-4 mx-auto">
+                            <div class="alert alert-danger alert-dismissible fade show " role="alert">
+                                ${cadena}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                                    <span aria-hidden="true">&times;</span>
+                               </button>
+                            </div>
+                        </div>
+                    </div>`;
+        return mensaje;
+    }
+
+    $('#agregar').click((e) => {
+        e.preventDefault();
+
+        if (seleccionado === undefined) {
+            limpiarCampos();
+            $('#message').append(message('Seleccione producto'));
+            return;
+        }
+
+        let cantidad = $('#cantidad').val();
+        if (cantidad > listado[seleccionado].unidades) {
+            limpiarCampos();
+            $('#message').append(message('Excedió el limite de unidades'));
+            return;
+        }
+        let subtotal = cantidad * listado[seleccionado].precio_venta;
+
+        total = parseFloat($('#total').text());
+        total = parseFloat(total + subtotal);
+        $('#total').text(total);
+
+        let registro = {
+            "id": listado[seleccionado].id,
+            "title": listado[seleccionado].title,
+            "cantidad": cantidad,
+            "description": listado[seleccionado].description,
+            "precio": listado[seleccionado].precio_venta,
+            "subtotal": subtotal
+        }
+
+        detalle.push(registro);
+        limpiarCampos();
+
+        $('#registros').append(`
+        <tr>
+            <td>${registro.title}</td>
+            <td class="text-right">${registro.cantidad}</td>
+            <td>${registro.description}</td>
+            <td class="text-right">${registro.precio}</td>
+            <td class="text-right">${registro.subtotal}</td>
+            <td class="btn btn-danger" id="eliminar">x</td>
+        </tr>`);
+    })
+
+    $('#guardar').click(async function () {
+        url = "/ventas/factura";
+        factura = {
+            cliente: $("input[name='nombre']").val(),
+            nit: $("input[name='nit']").val(),
+            total,
+            detalle
+        }
+
+        $('#registros').text('');
+        $('#total').text('0');
+
+        await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow',
+            body: JSON.stringify(factura)
+        });
+
+        window.location.assign('/ventas/factura');
+    })
+
+    function limpiarCampos() {
+        $('#cantidad').val('');
+        $('#buscar').val('');
+        seleccionado = undefined;
+    }
+
+    $(document).on('click', '#eliminar', function (e) {
+        e.preventDefault();
+
+        fila = $(this).closest('tr').index();
+        $(this).closest('tr').remove();
+
+        total -= detalle[fila].subtotal;
+        detalle.splice(fila, 1);
+        $('#total').text(total);
+    })
+</script>
