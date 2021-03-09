@@ -1,8 +1,21 @@
-<a href="/profile" class="btn btn-danger border-dark">Regresar</a>
-<div class="container card" style="overflow: scroll; height:500px; width:100%">
+<a href="/profile" class="btn btn-danger border-dark mostrar">Regresar</a>
+<input type="button" id="imprimir" value="Imprimir" class="float-right btn btn-secondary" />
+
+<div class="container card" style="overflow-y:auto" id="area">
+    
     <h1 style="text-align: center;">Ventas</h1>
-    <div class="row">
-        <h2 class="bg-danger col-3" style="text-align: center;">Total: Q. {{total}}</h2>
+    
+    <form action="/ventas" method="POST">
+        <div class="input-group">
+            <input type="month" name="date" value="{{ fecha }}">
+            <div class="input-group-append mostrar">
+                <input type="submit" value="Consultar" class="btn btn-primary">
+            </div>
+        </div>
+    </form>
+
+    <div class="input-group mt-3">
+        <h2 class="bg-danger col-3 text-center"> Total: Q. {{total}}</h2>
     </div>
 
     <table class="table table-bordered">
@@ -20,11 +33,32 @@
                 <td>{{timeago created_at}}</td>
                 <td>{{cliente}}</td>
                 <td>{{nit}}</td>
-                <td>Q {{total}}</td>
-                <td class="p-0"><a href="/ventas/{{id}}" class="btn btn-info btn-block" id="mostrar">Detalle</a>
+                <td class="text-right">Q {{total}}</td>
+                <td class="p-0 mostrar"><a href="/ventas/{{id}}" class="btn btn-info btn-block">Detalle</a>
                 </td>
             </tr>
             {{/each}}
         </tbody>
     </table>
 </div>
+
+<script>
+
+    $(document).ready(function () {
+        var height = $(window).height();
+        $('.card').height(height - 100);
+    });
+
+    
+    $('#imprimir').click(() => {
+        $('.mostrar').hide();
+
+        var contentImprimir= $('#area').html();
+        $('body').html(contentImprimir);
+
+        window.print();
+        window.location.reload()
+        return false
+    })
+
+</script>

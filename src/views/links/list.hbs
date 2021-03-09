@@ -1,24 +1,29 @@
 <div class="container p-4">
     <div class="row">
+        <h1>Inventario</h1>
+        <input type="text" id="buscar" placeholder="Buscar" class="form-control" align="center">
 
-        {{#each links}}
-            <div class="col-md-3">
-                <div class="card text-center">
-                     <div class="card-body">
-                        <a href="{{url}}" target= "_blank">
-                            <h3 class="card-title text-uppercase"> 
-                            {{title}}
-                            </h3>
-                        </a>
-                        <p class="m-2 ">descripcion: {{description}} </p>
-                        <p class="m-2"> cantidad: {{unidades}}</p>
-                        <p>{{timeago created_at}}</p>
-                        <a href="/links/delete/{{id}}" class="btn btn-danger"> Delete</a>
-                        <a href="/links/edit/{{id}}" class="btn btn-secondary">Edit</a>
-                     </div>
-                </div>
-            </div>
-            
+        <table border="2" cellspacing="0">
+            <tr align="center" bgcolor="yellow">
+                <th width="200">Titulo</th>
+                <th width="200">cantidad</th>
+                <th width="200">description</th>
+                <th width="200">Precio</th>
+                <th colspan="6">Opciones</th>
+            </tr>
+            {{#each links}}
+            <tr align="center">
+                <td>{{title}}</td>
+                <td>{{unidades}}</td>
+                <td>{{description}}</td>
+                <td>Q{{precio_venta}}</td>
+                <td> <a href="/links/delete/{{id}}" class="btn btn-danger"> Delete</a></td>
+                <td> <a href="/links/edit/{{id}}" class="btn btn-secondary">Edit</a> </td>
+                <td> <a href="/links/ingreso/{{id}}" class="btn btn-success">+</a></td>
+                <td> <a href="/links/egreso/{{id}}" class="btn btn-danger">-</a></td>
+                <td> <a href="/links/edit/{{id}}" class="btn btn-info">Detalles</a></td>
+                <td> <a href="/links/registro/{{id}}" class="btn btn-dark">Registro</a></td>
+            </tr>
             {{else}}
             <div class="col md-4 mx-auto">
                 <div class="card card-body text-center">
@@ -26,8 +31,35 @@
                     <a href="/links/add">Crea uno!</a>
                 </div>
             </div>
-        {{/each}}  
-       
+            {{/each}}
+        </table>
     </div>
-     <a href="/links/add" class="btn btn-success ">añadir</a>  
+    <a href="/links/add" class="btn btn-success ">añadir</a>
 </div>
+
+<script>
+    let productos;
+
+    $(document).ready(() => {
+        productos = $('table tr').slice(1).toArray();
+
+        $('#buscar').keyup(() => {
+            let cadena = $('#buscar').val();
+            filtrar(cadena);
+        })
+    })
+
+    let filtrar = (cadena) => {
+        let regex = new RegExp(cadena);
+
+        $('table tr').slice(1).each(function () {
+            let item = $(this).find('td:eq(0)').text();
+            if (!item.match(regex)) {
+                $(this).hide();
+            } else {
+                $(this).show();
+            }
+        })
+    }
+
+</script>

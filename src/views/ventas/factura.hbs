@@ -2,8 +2,8 @@
 <div id="message">
 </div>
 <div class="container col-6" style="padding-top: 20px;">
-    <div class="card">
-        <form class="col" style="padding-top:30px;">
+    <div class="card col">
+        <form style="padding-top:30px;">
             <div class="form-group row">
                 <div class="col">
                     <input type="text" name="nit" placeholder="NIT" class="form-control">
@@ -12,8 +12,8 @@
                     <input type="text" name="nombre" placeholder="Nombre" class="form-control">
                 </div>
             </div>
-            <br>
-            <div class="form-group row">
+            
+            <div class="row">
                 <div class="col-md-6">
                     <input type="search" id="buscar" list="productos" placeholder="Producto" class="form-control">
                 </div>
@@ -27,38 +27,36 @@
 
             <datalist id="productos">
             </datalist>
-
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead class="text-center">
-                        <tr>
-                            <th>Producto</th>
-                            <th>Cantidad</th>
-                            <th>Descripción</th>
-                            <th>Precio</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="registros">
-                    </tbody>
-
-                    <tfoot>
-                        <tr>
-                            <th class="text-center" colspan="4">Total</th>
-                            <td class="text-right">
-                                <label id="total">0</label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="5">
-                                <input type="button" value="Guardar" id="guardar" class="btn btn-block btn-success">
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
         </form>
+
+        <table class="table table-bordered mt-3">
+            <thead class="text-center">
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+
+            <tbody id="registros">
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <th class="text-center" colspan="4">Total</th>
+                    <td class="text-right">
+                        <label id="total">0</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <input type="button" value="Guardar" id="guardar" class="btn btn-block btn-success">
+                    </td>
+                </tr>
+            </tfoot>
+        </table>    
     </div>
 </div>
 
@@ -87,7 +85,7 @@
         listado = await res.json();
 
         listado.forEach((item, i) => {
-            cadena += `<option data-name="${i}"  value="${item.title}" class="sel" />`;
+            cadena += `<option data-name="${i}"  value="${item.title}" />`;
         })
 
         //Agrega todos los productos para que los puedan ver desde el cuadro de busqueda
@@ -126,8 +124,13 @@
         let subtotal = cantidad * listado[seleccionado].precio_venta;
 
         total = parseFloat($('#total').text());
+        console.log('Total inicial:', total);
         total = parseFloat(total + subtotal);
-        $('#total').text(total);
+        console.log('Subtotal: ',subtotal);
+        console.log('Total final:', total);
+        
+        
+        $('#total').text(total.toFixed(2));
 
         let registro = {
             "id": listado[seleccionado].id,
@@ -148,12 +151,12 @@
             <td>${registro.description}</td>
             <td class="text-right">${registro.precio}</td>
             <td class="text-right">${registro.subtotal}</td>
-            <td class="btn btn-danger" id="eliminar">x</td>
+            <td class="btn btn-danger btn-block" id="eliminar">x</td>
         </tr>`);
     })
 
     $('#guardar').click(async function () {
-        if($("input[name='nombre").val()==="" || $("input[name='nit']").val()===""){
+        if ($("input[name='nombre").val() === "" || $("input[name='nit']").val() === "") {
             $("#message").append(message('Ingrese información del cliente'));
             return
         }
@@ -191,9 +194,13 @@
 
         fila = $(this).closest('tr').index();
         $(this).closest('tr').remove();
+        
+        total= parseFloat(total.toFixed(2));
 
         total -= detalle[fila].subtotal;
+        
         detalle.splice(fila, 1);
-        $('#total').text(total);
+        $('#total').text(total.toFixed(2));
     })
+
 </script>
