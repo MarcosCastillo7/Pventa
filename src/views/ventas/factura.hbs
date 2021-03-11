@@ -12,19 +12,26 @@
 }
     }
     </style>
-<div class="container col-6" id="scroll" style="padding-top: 20px;">
+<div class="container col-6" id="scroll" style="padding-top: 15px;">
     <div class="card">
         <h3 align="center">Nueva Venta</h3>
         <form class="col" style="padding-top:30px;">
             <div class="form-group row">
-                <div class="col">
+                <div class="col"> Nit
                     <input type="text" name="nit" placeholder="NIT" class="form-control">
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-8"> Nombre Cliente
+                   
                     <input type="text" name="nombre" placeholder="Nombre" class="form-control">
                 </div>
+                <br>
+                <br>
+                
+                <div class="col-md-4"> Efectivo
+                    <input type="text" id="text" name="text" placeholder="Efectivo" class="form-control">
+                </div>
             </div>
-            <br>
+            
             <div class="form-group row">
                 <div class="col-md-6">
                     <input type="search" id="buscar" list="productos" placeholder="Producto" class="form-control">
@@ -61,14 +68,23 @@
                             <td class="text-right">
                                 <label id="total">0</label>
                             </td>
+                            
                         </tr>
-                        <tr>
-                            <td colspan="5">
-                                <input type="button" value="Guardar" id="guardar" class="btn btn-block btn-success">
+                         <tr>
+                            <th class="text-center" colspan="4">Cambio</th>
+                            <td class="text-right">
+                                <label id="efe">0</label>
                             </td>
+                            
+                        </tr>   
+                        <tr>
+                            {{!-- <td colspan="5">
+                                <input type="button" value="Guardar" id="guardar" class="btn btn-block btn-success">
+                            </td> --}}
                         </tr>
                     </tfoot>
                 </table>
+                 <input type="button" value="Guardar" id="guardar" class="btn btn-block btn-success">
             </div>
         </form>
     </div>
@@ -78,12 +94,14 @@
     var factura;
     var detalle = [];
     var productos = document.getElementById('productos');
-    var seleccionado;
+    var seleccionado=0;
     var fila;
     var total = 0;
+    var efe= 0;
     var listado = [];
     var cadena = "";
 
+     
     verProductos();
 
     $('#buscar').on('input', () => {
@@ -91,8 +109,9 @@
         console.log("valor:", val);
         seleccionado = $('#productos').find(`option[value="${val}"]`).data('name');
         $('#cantidad').attr('max', listado[seleccionado].unidades);
+      
     })
-
+        
 
     async function verProductos() {
         let res = await fetch('/ventas/productos');
@@ -120,6 +139,48 @@
         return mensaje;
     }
 
+ var a = parseFloat($("input[name='text']").val());
+var x =0;
+  var text = document.getElementById('text');
+   text.addEventListener('keyup',(event) =>{
+    //    console.log(event);
+       var inputText = event.path[0].value;
+       document.querySelector.innerHTML = inputText;
+	   console.log(inputText);
+        x= parseFloat(inputText);
+       console.log( x);
+       efe = parseFloat($('#efe').text());
+
+        if(total===0){
+          efe = parseFloat(x); 
+          efe=x; 
+       }
+        efe = parseFloat(x-total);
+            
+           if(x<total && x>0){
+               console.log( x);
+               efe=x;   
+        $( document ).ready(()=> {
+     $('#efe').text("Ingrese más efectivo");
+            });
+        
+           }
+         else if(isNaN(x)){
+            efe =0;
+             $('#efe').text('0');
+             efe = parseFloat($('#efe').text());
+        }
+
+        if(x==0){
+            efe =0;
+             $('#efe').text('0');
+             efe = parseFloat($('#efe').text());
+        }
+        $('#efe').text(efe.toFixed(2));      
+        return x;
+   });
+
+
     $('#agregar').click((e) => {
         e.preventDefault();
 
@@ -130,16 +191,57 @@
         }
 
         let cantidad = $('#cantidad').val();
-        if (cantidad > listado[seleccionado].unidades) {
+        
+       if (cantidad > listado[seleccionado].unidades) {
             limpiarCampos();
-            $('#message').append(message('Excedió el limite de unidades'));
+            $('#message').append(message('Excedió el limite de unidades de ese producto'));
             return;
         }
-        let subtotal = cantidad * listado[seleccionado].precio_venta;
+      else if(cantidad==='0'){
+             limpiarCampos();
+           $('#message').append(message('ingrese al menos una unidad'));
+            return;
+        }
+      console.log(typeof cantidad);
+           let subtotal = cantidad * listado[seleccionado].precio_venta; 
 
+           listado[seleccionado].unidades -= cantidad;
+    
         total = parseFloat($('#total').text());
         total = parseFloat(total + subtotal);
-        $('#total').text(total);
+        $('#total').text(total.toFixed(2));
+        efe = parseFloat($('#efe').text());
+       if(total===0){
+          efe = parseFloat(x); 
+          efe=x; 
+       }
+       
+        efe = parseFloat(x-total);
+            
+           if(x<total && x>0){
+               console.log( x);
+               efe=x;   
+        $( document ).ready(()=> {
+     $('#efe').text("Ingrese más efectivo");
+            });
+        
+           }
+         else if(isNaN(x)){
+            efe =0;
+             $('#efe').text('0');
+             efe = parseFloat($('#efe').text());
+        }
+
+        if(x==0){
+            efe =0;
+             $('#efe').text('0');
+             efe = parseFloat($('#efe').text());
+        }
+       
+         console.log(total, 'agregar');
+        $('#efe').text(efe.toFixed(2));
+        console.log(x);
+     
 
         let registro = {
             "id": listado[seleccionado].id,
@@ -147,9 +249,11 @@
             "cantidad": cantidad,
             "description": listado[seleccionado].description,
             "precio": listado[seleccionado].precio_venta,
-            "subtotal": subtotal
+            "subtotal": subtotal,
+            "listado":  listado[seleccionado].unidades
         }
 
+         
         detalle.push(registro);
         limpiarCampos();
 
@@ -162,9 +266,68 @@
             <td class="text-right">${registro.subtotal}</td>
             <td class="btn btn-danger" id="eliminar">x</td>
         </tr>`);
+
     })
 
-    $('#guardar').click(async function () {
+   
+
+    function limpiarCampos() {
+        $('#cantidad').val('');
+        $('#buscar').val('');
+        seleccionado = undefined;
+    }
+
+    $(document).on('click', '#eliminar', function (e) {
+        e.preventDefault();
+  console.log(total);
+        fila = $(this).closest('tr').index();
+        $(this).closest('tr').remove();
+        total= parseFloat(total.toFixed(2));
+         console.log(total);    
+        total -= detalle[fila].subtotal;
+          console.log( detalle[fila].listado,'inicio');
+            detalle[fila].cantidad= parseFloat(detalle[fila].cantidad);
+         detalle[fila].listado += detalle[fila].cantidad;
+        console.log(typeof detalle[fila].cantidad,'cantidad');
+        console.log( detalle[fila].listado, 'sumado');
+        console.log(listado[seleccionado],'listado');
+         console.log(total);
+        
+         if(total<0){
+             total=0;
+         }
+        if(x<total && x>0){
+            $( document ).ready(()=> {
+     $('#efe').text("Ingrese más efectivo");
+            });
+            efe=x;
+        }
+        else if(total===0 || x===0){
+            efe=x;
+
+            if(isNaN(x)){
+                x=0;
+                efe=x;
+            }
+        }
+        else if(x>=total){
+            efe = parseFloat(x-total);
+        }
+        else{
+             efe+=detalle[fila].subtotal;
+        }
+      
+        detalle.splice(fila, 1);
+        $('#total').text(total.toFixed(2));
+         console.log(total, 'eliminar');
+        $('#efe').text(efe.toFixed(2));
+    })
+    
+ $('#guardar').click(async function () {
+         if ($("input[name='nombre").val() === "" || $("input[name='nit']").val() === "") {
+            $("#message").append(message('Ingrese información del cliente'));
+            return
+        }
         url = "/ventas/factura";
         factura = {
             cliente: $("input[name='nombre']").val(),
@@ -188,20 +351,4 @@
         window.location.assign('/ventas/factura');
     })
 
-    function limpiarCampos() {
-        $('#cantidad').val('');
-        $('#buscar').val('');
-        seleccionado = undefined;
-    }
-
-    $(document).on('click', '#eliminar', function (e) {
-        e.preventDefault();
-
-        fila = $(this).closest('tr').index();
-        $(this).closest('tr').remove();
-
-        total -= detalle[fila].subtotal;
-        detalle.splice(fila, 1);
-        $('#total').text(total);
-    })
 </script>
