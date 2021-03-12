@@ -1,19 +1,36 @@
 <a href="/profile" class="btn btn-danger border-dark">Regresar</a>
 <div id="message">
 </div>
-<div class="container col-6" style="padding-top: 20px;">
-    <div class="card col">
-        <form style="padding-top:30px;">
+
+<style>
+    #scroll {
+        width: 70%;
+        height: 600px;
+        overflow: scroll;
+    }
+</style>
+
+<div class="container col-6" id="scroll" style="padding-top: 15px;">
+    <div class="card">
+        <h3 align="center">Nueva Venta</h3>
+        <form class="col" style="padding-top:30px;">
             <div class="form-group row">
-                <div class="col">
+                <div class="col"> Nit
                     <input type="text" name="nit" placeholder="NIT" class="form-control">
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-8"> Nombre Cliente
+
                     <input type="text" name="nombre" placeholder="Nombre" class="form-control">
                 </div>
+                <br>
+                <br>
+
+                <div class="col-md-4"> Efectivo
+                    <input type="text" id="text" name="text" placeholder="Efectivo" class="form-control">
+                </div>
             </div>
-            
-            <div class="row">
+
+            <div class="form-group row">
                 <div class="col-md-6">
                     <input type="search" id="buscar" list="productos" placeholder="Producto" class="form-control">
                 </div>
@@ -27,36 +44,47 @@
 
             <datalist id="productos">
             </datalist>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="registros">
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <th class="text-center" colspan="4">Total</th>
+                            <td class="text-right">
+                                <label id="total">0</label>
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <th class="text-center" colspan="4">Cambio</th>
+                            <td class="text-right">
+                                <label id="efe">0</label>
+                            </td>
+
+                        </tr>
+                        <tr>
+                            {{!-- <td colspan="5">
+                                <input type="button" value="Guardar" id="guardar" class="btn btn-block btn-success">
+                            </td> --}}
+                        </tr>
+                    </tfoot>
+                </table>
+                <input type="button" value="Guardar" id="guardar" class="btn btn-block btn-success">
+            </div>
         </form>
-
-        <table class="table table-bordered mt-3">
-            <thead class="text-center">
-                <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Subtotal</th>
-                </tr>
-            </thead>
-
-            <tbody id="registros">
-            </tbody>
-
-            <tfoot>
-                <tr>
-                    <th class="text-center" colspan="4">Total</th>
-                    <td class="text-right">
-                        <label id="total">0</label>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="5">
-                        <input type="button" value="Guardar" id="guardar" class="btn btn-block btn-success">
-                    </td>
-                </tr>
-            </tfoot>
-        </table>    
     </div>
 </div>
 
@@ -64,9 +92,10 @@
     var factura;
     var detalle = [];
     var productos = document.getElementById('productos');
-    var seleccionado;
+    var seleccionado = 0;
     var fila;
     var total = 0;
+    var efe = 0;
     var listado = [];
     var cadena = "";
 
@@ -77,21 +106,18 @@
         console.log("valor:", val);
         seleccionado = $('#productos').find(`option[value="${val}"]`).data('name');
         $('#cantidad').attr('max', listado[seleccionado].unidades);
-    })
 
+    })
 
     async function verProductos() {
         let res = await fetch('/ventas/productos');
         listado = await res.json();
-
         listado.forEach((item, i) => {
-            cadena += `<option data-name="${i}"  value="${item.title}" />`;
+            cadena += `<option data-name="${i}"  value="${item.title}" class="sel" />`;
         })
-
         //Agrega todos los productos para que los puedan ver desde el cuadro de busqueda
         productos.innerHTML = cadena;
     }
-
     function message(cadena) {
         let mensaje = `<div class="row">
                         <div class="col-md-4 mx-auto">
@@ -105,45 +131,112 @@
                     </div>`;
         return mensaje;
     }
+    var a = parseFloat($("input[name='text']").val());
+    var x = 0;
+    var text = document.getElementById('text');
+    text.addEventListener('keyup', (event) => {
+        //    console.log(event);
+        var inputText = event.path[0].value;
+        document.querySelector.innerHTML = inputText;
+        console.log(inputText);
+        x = parseFloat(inputText);
+        console.log(x);
+        efe = parseFloat($('#efe').text());
+        if (total === 0) {
+            efe = parseFloat(x);
+            efe = x;
+        }
+        efe = parseFloat(x - total);
 
+        if (x < total && x > 0) {
+            console.log(x);
+            efe = x;
+            $(document).ready(() => {
+                $('#efe').text("Ingrese más efectivo");
+            });
+
+        }
+        else if (isNaN(x)) {
+            efe = 0;
+            $('#efe').text('0');
+            efe = parseFloat($('#efe').text());
+        }
+        if (x == 0) {
+            efe = 0;
+            $('#efe').text('0');
+            efe = parseFloat($('#efe').text());
+        }
+        $('#efe').text(efe.toFixed(2));
+        return x;
+    });
     $('#agregar').click((e) => {
         e.preventDefault();
-
         if (seleccionado === undefined) {
             limpiarCampos();
             $('#message').append(message('Seleccione producto'));
             return;
         }
-
         let cantidad = $('#cantidad').val();
+
         if (cantidad > listado[seleccionado].unidades) {
             limpiarCampos();
-            $('#message').append(message('Excedió el limite de unidades'));
+            $('#message').append(message('Excedió el limite de unidades de ese producto'));
             return;
         }
+        else if (cantidad === '0') {
+            limpiarCampos();
+            $('#message').append(message('ingrese al menos una unidad'));
+            return;
+        }
+        console.log(typeof cantidad);
         let subtotal = cantidad * listado[seleccionado].precio_venta;
+        listado[seleccionado].unidades -= cantidad;
 
         total = parseFloat($('#total').text());
-        console.log('Total inicial:', total);
         total = parseFloat(total + subtotal);
-        console.log('Subtotal: ',subtotal);
-        console.log('Total final:', total);
-        
-        
         $('#total').text(total.toFixed(2));
+        efe = parseFloat($('#efe').text());
+        if (total === 0) {
+            efe = parseFloat(x);
+            efe = x;
+        }
+
+        efe = parseFloat(x - total);
+
+        if (x < total && x > 0) {
+            console.log(x);
+            efe = x;
+            $(document).ready(() => {
+                $('#efe').text("Ingrese más efectivo");
+            });
+
+        }
+        else if (isNaN(x)) {
+            efe = 0;
+            $('#efe').text('0');
+            efe = parseFloat($('#efe').text());
+        }
+        if (x == 0) {
+            efe = 0;
+            $('#efe').text('0');
+            efe = parseFloat($('#efe').text());
+        }
+
+        console.log(total, 'agregar');
+        $('#efe').text(efe.toFixed(2));
+        console.log(x);
 
         let registro = {
-            "id": listado[seleccionado].id,
+            "id_producto":listado[seleccionado].id,            
             "title": listado[seleccionado].title,
             "cantidad": cantidad,
             "description": listado[seleccionado].description,
             "precio": listado[seleccionado].precio_venta,
-            "subtotal": subtotal
+            "subtotal": subtotal,   
         }
 
         detalle.push(registro);
         limpiarCampos();
-
         $('#registros').append(`
         <tr>
             <td>${registro.title}</td>
@@ -151,8 +244,70 @@
             <td>${registro.description}</td>
             <td class="text-right">${registro.precio}</td>
             <td class="text-right">${registro.subtotal}</td>
-            <td class="btn btn-danger btn-block" id="eliminar">x</td>
+            <td class="btn btn-danger" id="eliminar">x</td>
         </tr>`);
+    })
+
+    function limpiarCampos() {
+        $('#cantidad').val('');
+        $('#buscar').val('');
+        seleccionado = undefined;
+    }
+    $(document).on('click', '#eliminar', function (e) {
+        e.preventDefault();
+
+        console.log("detalle vector", JSON.stringify(detalle));
+
+        console.log(total);
+        fila = $(this).closest('tr').index();
+        $(this).closest('tr').remove();
+        total = parseFloat(total.toFixed(2));
+        console.log(total);
+        total -= detalle[fila].subtotal;
+        detalle[fila].cantidad = parseFloat(detalle[fila].cantidad);
+        
+        let indiceListado = listado.findIndex( element=>  element.title == detalle[fila].title);
+        console.log("indice del Vector Listado: ",indiceListado);
+        
+        console.log("Unidades no actualizadas: ",listado[indiceListado].unidades);
+
+        //Agrego la cantidad de unidades que se van a eliminar.
+        listado[indiceListado].unidades += detalle[fila].cantidad;
+        
+        console.log(typeof detalle[fila].cantidad, 'cantidad');
+        
+        console.log("Nombre del producto que vamos actualizar: ",listado[indiceListado].title);
+        console.log("Unidades actualizadas: ", listado[indiceListado].unidades);
+        
+        console.log(total);
+
+        if (total < 0) {
+            total = 0;
+        }
+        if (x < total && x > 0) {
+            $(document).ready(() => {
+                $('#efe').text("Ingrese más efectivo");
+            });
+            efe = x;
+        }
+        else if (total === 0 || x === 0) {
+            efe = x;
+            if (isNaN(x)) {
+                x = 0;
+                efe = x;
+            }
+        }
+        else if (x >= total) {
+            efe = parseFloat(x - total);
+        }
+        else {
+            efe += detalle[fila].subtotal;
+        }
+
+        detalle.splice(fila, 1);
+        $('#total').text(total.toFixed(2));
+        console.log(total, 'eliminar');
+        $('#efe').text(efe.toFixed(2));
     })
 
     $('#guardar').click(async function () {
@@ -167,10 +322,8 @@
             total,
             detalle
         }
-
         $('#registros').text('');
         $('#total').text('0');
-
         await fetch(url, {
             method: 'POST',
             headers: {
@@ -179,28 +332,6 @@
             redirect: 'follow',
             body: JSON.stringify(factura)
         });
-
         window.location.assign('/ventas/factura');
     })
-
-    function limpiarCampos() {
-        $('#cantidad').val('');
-        $('#buscar').val('');
-        seleccionado = undefined;
-    }
-
-    $(document).on('click', '#eliminar', function (e) {
-        e.preventDefault();
-
-        fila = $(this).closest('tr').index();
-        $(this).closest('tr').remove();
-        
-        total= parseFloat(total.toFixed(2));
-
-        total -= detalle[fila].subtotal;
-        
-        detalle.splice(fila, 1);
-        $('#total').text(total.toFixed(2));
-    })
-
 </script>
