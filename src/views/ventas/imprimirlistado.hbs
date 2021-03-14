@@ -1,0 +1,78 @@
+<a href="/ventas" class="btn btn-danger">Regresar</a>
+<a id="imprimir" class="btn btn-secondary">Imprimir</a>
+
+<div class="container mt-3" id="area" style="overflow-y: auto;">
+    <h1 class="card-title" align="center">Reporte mensual ventas</h1>
+    <h2>Fecha: <input type="month" value="{{mes.date}}" disabled style="font-size: 30px; border:none;"></h2>
+
+    <h2>Total Ventas: Q. {{mes.total}}</h2>
+
+
+    {{#each mes.ventas }}
+
+    <div class="card border-dark venta">
+        <div class="card-body">
+            <h3 align="center">Venta</h3>
+            <table class="table table-bordered">
+                <tr>
+                    <th> Cliente</th>
+                    <th> NIT </th>
+                    <th> Fecha </th>
+                    <th> Total </th>
+                </tr>
+                <tr>
+                    <th>{{ cliente }}</th>
+                    <th>{{ nit }}</th>
+                    <th>{{ time created_at }}</th>
+                    <th>Q {{ total }}</th>
+                </tr>
+            </table>
+        </div>
+        <div class="card-body">
+            <h5 align="center">Detalle</h5>
+            <table class="table table-bordered">
+
+                <tr>
+                    <th>Producto</th>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Subtotal</th>
+                </tr>
+
+
+                {{#each detalle}}
+                <tr>
+                    <td>{{ title }}</td>
+                    <td>{{ description }}</td>
+                    <td>{{ cantidad }} </td>
+                    <td>{{ precio }}</td>
+                    <td>{{ subtotal }}</td>
+                </tr>
+                {{/each}}
+            </table>
+        </div>
+    </div>
+
+    {{/each}}
+</div>
+
+<script>
+    $(document).ready(function () {
+        var height = $(window).height();
+        console.log("heigh:", height);
+        $('#area').height(height - 150);
+    })
+   
+    $('#imprimir').click(() => {
+        $('.mostrar').hide();
+
+        var contentImprimir = $('#area').html();
+        $('body').html(contentImprimir);
+        $('.venta').css('page-break-inside', 'avoid');
+        window.print();
+        window.location.reload()
+        return false
+    })
+
+</script>

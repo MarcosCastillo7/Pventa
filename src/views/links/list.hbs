@@ -1,38 +1,44 @@
-<div class="container p-4">
-    <div class="row">
-        <h1>Inventario</h1>
-        <input type="text" id="buscar" placeholder="Buscar" class="form-control" align="center">
+<a id="imprimir" class="btn btn-secondary">Imprimir</a>
 
-        <table border="2" cellspacing="0">
-            <tr align="center" bgcolor="yellow">
-                <th width="200">Titulo</th>
-                <th width="200">cantidad</th>
-                <th width="200">description</th>
-                <th width="200">Precio</th>
-                <th colspan="6">Opciones</th>
-            </tr>
-            {{#each links}}
-            <tr align="center">
-                <td>{{title}}</td>
-                <td>{{unidades}}</td>
-                <td>{{description}}</td>
-                <td>Q{{precio_venta}}</td>
-                <td> <a href="/links/delete/{{id}}" class="btn btn-danger"> Delete</a></td>
-                <td> <a href="/links/edit/{{id}}" class="btn btn-secondary">Edit</a> </td>
-                <td> <a href="/links/ingreso/{{id}}" class="btn btn-success">+</a></td>
-                <td> <a href="/links/egreso/{{id}}" class="btn btn-danger">-</a></td>
-                <td> <a href="/links/edit/{{id}}" class="btn btn-info">Detalles</a></td>
-                <td> <a href="/links/registro/{{id}}" class="btn btn-dark">Registro</a></td>
-            </tr>
-            {{else}}
-            <div class="col md-4 mx-auto">
-                <div class="card card-body text-center">
-                    <p>No hay links Guardados aún</p>
-                    <a href="/links/add">Crea uno!</a>
+<input type="text" id="buscar" placeholder="Buscar" class="form-control" align="center">
+
+<div class="container p-4" id="area">
+    <div class="row">
+        <div class="col">
+            <h1 align="center">Inventario</h1>
+            <table border="2" cellspacing="0">
+                <tr align="center" bgcolor="yellow">
+                    <th width="200">Titulo</th>
+                    <th width="200">cantidad</th>
+                    <th width="200">description</th>
+                    <th width="200">Precio</th>
+                    <th colspan="6" class="mostrar">Opciones</th>
+                </tr>
+                {{#each links}}
+                <tr align="center">
+                    <td>{{title}}</td>
+                    <td>{{unidades}}</td>
+                    <td>{{description}}</td>
+                    <td>Q{{precio_venta}}</td>
+
+                    <td class="mostrar"> <a href="/links/delete/{{id}}" class="btn btn-danger"> Delete</a></td>
+                    <td class="mostrar"> <a href="/links/edit/{{id}}" class="btn btn-secondary">Edit</a> </td>
+                    <td class="mostrar"> <a href="/links/ingreso/{{id}}" class="btn btn-success">+</a></td>
+                    <td class="mostrar"> <a href="/links/egreso/{{id}}" class="btn btn-danger">-</a></td>
+                    <td class="mostrar"> <a href="/links/edit/{{id}}" class="btn btn-info">Detalles</a></td>
+                    <td class="mostrar"> <a href="/links/registro/{{id}}" class="btn btn-dark">Registro</a></td>
+                </tr>
+                {{else}}
+                <div class="col md-4 mx-auto">
+                    <div class="card card-body text-center">
+                        <p>No hay links Guardados aún</p>
+                        <a href="/links/add">Crea uno!</a>
+                    </div>
                 </div>
-            </div>
-            {{/each}}
-        </table>
+                {{/each}}
+            </table>
+
+        </div>
     </div>
     <a href="/links/add" class="btn btn-success ">añadir</a>
 </div>
@@ -40,12 +46,25 @@
 <script>
     let productos;
 
+
     $(document).ready(() => {
         productos = $('table tr').slice(1).toArray();
 
         $('#buscar').keyup(() => {
             let cadena = $('#buscar').val();
             filtrar(cadena);
+        })
+
+        $('#imprimir').click(() => {
+            $('.mostrar').hide();
+            $('table').addClass('table');
+
+            var contentImprimir = $('#area').html();
+            $('body').html(contentImprimir);
+
+            window.print();
+            window.location.reload()
+            return false
         })
     })
 

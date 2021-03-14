@@ -119,7 +119,7 @@ let detalleVenta = async (id) => {
 
 
 //EN proceso :V
-/* router.get('/imprimir/listado/:date', async (req, res) => {
+router.get('/imprimir/listado/:date', async (req, res) => {
     const date = req.params.date;
 
     objeto = {
@@ -132,10 +132,8 @@ let detalleVenta = async (id) => {
         element.detalle = await detalleVenta(element.id);
     }
 
-
-    
-    res.render('ventas/imprimirlistado', mes);
-}) */
+    res.render('ventas/imprimirlistado', {mes});
+})
 
 
 module.exports = router

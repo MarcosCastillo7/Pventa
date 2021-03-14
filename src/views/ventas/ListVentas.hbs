@@ -1,10 +1,11 @@
 <a href="/profile" class="btn btn-danger border-dark mostrar">Regresar</a>
-<input type="button" id="imprimir" value="Imprimir" class="float-right btn btn-secondary" />
+
+<a href="/ventas/imprimir/listado/{{fecha}}" class="btn btn-secondary">Reporte</a>
 
 <div class="container card" style="overflow-y:auto" id="area">
-    
+
     <h1 style="text-align: center;">Ventas</h1>
-    
+
     <form action="/ventas" method="POST">
         <div class="input-group">
             <input type="month" name="date" value="{{ fecha }}">
@@ -48,17 +49,5 @@
         var height = $(window).height();
         $('.card').height(height - 100);
     });
-
-    
-    $('#imprimir').click(() => {
-        $('.mostrar').hide();
-
-        var contentImprimir= $('#area').html();
-        $('body').html(contentImprimir);
-
-        window.print();
-        window.location.reload()
-        return false
-    })
 
 </script>
