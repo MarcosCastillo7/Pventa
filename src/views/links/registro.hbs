@@ -1,0 +1,33 @@
+<a href="/links" class="btn btn-danger btn-sm">Regresar</a>
+
+<div class="container p-0">
+    <h2 align="center">Registro de Actualizaciones</h2>
+    <h5>Producto: {{link.title}}</h5>
+    <div class="row" style="overflow-y:auto" id="scroll">
+        <table border="2" cellspacing="0" bordercolor="black">
+            <tr align="center" bgcolor="gray" style="color:#ffff">
+                <th width="225">Existencia</th>
+                <th width="225">ingreso</th>
+                <th width="225">Egreso</th>
+                <th width="225">Usuario</th>
+                <th width="225">Fecha</th>
+            </tr>
+            {{#each registros}}
+            <tr align="center">
+                <td>{{existencia}}</td>
+                <td>{{ingreso}}</td>
+                <td>{{egreso}}</td>
+                <td>{{usuario}}</td>
+                <td>{{time created_at}}</td>
+            </tr>
+
+            {{/each}}
+        </table>
+    </div>
+</div>
+<script>
+    $(document).ready(()=>{
+        var height = $(window).height();
+        $('#scroll').height(height-210);
+    })
+</script>

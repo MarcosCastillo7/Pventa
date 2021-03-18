@@ -2,7 +2,7 @@
 
 <a href="/ventas/imprimir/listado/{{fecha}}" class="btn btn-secondary">Reporte</a>
 
-<div class="container card" style="overflow-y:auto" id="area">
+<div class="container card" style="overflow-y:auto" id="scroll"> {{!-- Establece el id scroll :V --}}
 
     <h1 style="text-align: center;">Ventas</h1>
 
@@ -47,7 +47,7 @@
 
     $(document).ready(function () {
         var height = $(window).height();
-        $('.card').height(height - 100);
+        $('#scroll').height(height - 100);
     });
 
 </script>

@@ -1,78 +1,115 @@
-<a id="imprimir" class="btn btn-secondary">Imprimir</a>
+<div class=" form-group row mostrar" style="margin:10px">
 
-<input type="text" id="buscar" placeholder="Buscar" class="form-control" align="center">
+    <a href="/links/p/add"><img src="img/mas.png" width="40px"> </a>
+    <a id="imprimir" class="btn btn-secondary" style="margin:1.5px">Imprimir</a>
 
-<div class="container p-4" id="area">
-    <div class="row">
-        <div class="col">
-            <h1 align="center">Inventario</h1>
-            <table border="2" cellspacing="0">
-                <tr align="center" bgcolor="yellow">
-                    <th width="200">Titulo</th>
-                    <th width="200">cantidad</th>
-                    <th width="200">description</th>
-                    <th width="200">Precio</th>
-                    <th colspan="6" class="mostrar">Opciones</th>
-                </tr>
-                {{#each links}}
-                <tr align="center">
-                    <td>{{title}}</td>
-                    <td>{{unidades}}</td>
-                    <td>{{description}}</td>
-                    <td>Q{{precio_venta}}</td>
+    <input type="search" id="buscar" list="productos" placeholder="Buscar" style="margin:1px"
+        class="form-control col-md-3 ">
+</div>
 
-                    <td class="mostrar"> <a href="/links/delete/{{id}}" class="btn btn-danger"> Delete</a></td>
-                    <td class="mostrar"> <a href="/links/edit/{{id}}" class="btn btn-secondary">Edit</a> </td>
-                    <td class="mostrar"> <a href="/links/ingreso/{{id}}" class="btn btn-success">+</a></td>
-                    <td class="mostrar"> <a href="/links/egreso/{{id}}" class="btn btn-danger">-</a></td>
-                    <td class="mostrar"> <a href="/links/edit/{{id}}" class="btn btn-info">Detalles</a></td>
-                    <td class="mostrar"> <a href="/links/registro/{{id}}" class="btn btn-dark">Registro</a></td>
-                </tr>
-                {{else}}
-                <div class="col md-4 mx-auto">
-                    <div class="card card-body text-center">
-                        <p>No hay links Guardados aún</p>
-                        <a href="/links/add">Crea uno!</a>
-                    </div>
-                </div>
-                {{/each}}
-            </table>
+<h1 align="center" class="inventario">Inventario</h1> {{!-- class inventario para imprimir :V --}}
 
-        </div>
-    </div>
-    <a href="/links/add" class="btn btn-success ">añadir</a>
+<div class="p-4 area" id="scroll" style="overflow-y: auto;"> {{!-- class Area para imprimir y id scroll --}}
+    <table border="2" cellspacing="0">
+        <tr align="center" bgcolor="#F8BC1E">
+            <th width="50">#</th>
+            <th width="200">Nombre</th>
+            <th width="200">Existencia</th>
+            <th width="200">Precio</th>
+            {{#if user.Tipo_usuario}}
+            <th colspan="6" class="mostrar">Opciones</th>
+        </tr>
+        {{#each prod}}
+        <tr align="center">
+            <td>{{num}}</td>
+            <td>{{title}}</td>
+            <td>{{unidades}}</td>
+            <td>Q{{precio_venta}}</td>
+            <!-- llamar a la funcion eliminar y mandar la ruta con el id  -->
+            <td class="mostrar"> <a onclick="eliminar('/links/delete/{{id}}')"  class="btn btn-danger"> Delete</a></td>
+
+            <td class="mostrar"> <a href="/links/edit/{{id}}" class="btn btn-secondary">Edit</a> </td>
+            <td class="mostrar"> <a href="/links/ingreso/{{id}}" class="btn btn-success">+</a></td>
+            <td class="mostrar"> <a href="/links/egreso/{{id}}" class="btn btn-danger">-</a></td>
+            <td class="mostrar"> <a href="/links/detalles_p/{{id}}" class="btn btn-info">Detalles</a></td>
+            <td class="mostrar"> <a href="/links/registro/{{id}}" class="btn btn-dark">Registro</a></td>
+        </tr>
+        {{/each}}
+    </table>
+    {{else}}
+    <th colspan="5" class="mostrar">Opciones</th>
+    </tr>
+    {{#each prod}}
+    <tr align="center">
+        <td>{{num}}</td>
+        <td>{{title}}</td>
+        <td>{{unidades}}</td>
+        <td>Q{{precio_venta}}</td>
+        <!-- llamar a la funcion eliminar y mandar la ruta con el id  -->
+        <td class="mostrar"> <a onclick="eliminar('/links/delete/{{id}}')" class="btn btn-danger">Eliminar</a></td>
+      
+        <td class="mostrar"> <a href="/links/edit/{{id}}" class="btn btn-secondary">Edit</a> </td>
+        <td class="mostrar"> <a href="/links/ingreso/{{id}}" class="btn btn-success">+</a></td>
+        <td class="mostrar"> <a href="/links/egreso/{{id}}" class="btn btn-danger">-</a></td>
+        <td class="mostrar"> <a href="/links/detalles_p/{{id}}" class="btn btn-info">Detalles</a></td>
+    </tr>
+    {{/each}}
+    </table>
+    {{/if}}
 </div>
 
 <script>
-    let productos;
 
+    /* funcion para eliminar el producto */
+    let eliminar = async(url) => {
+        Swal.fire({
+            title: 'Quieres eliminar el producto?',
+            showCancelButton: true,
+            confirmButtonText: `Si`,
+            cancelButtonText: 'Cancelar',
+        }).then(async (pregunta) => {
+            if (pregunta.isConfirmed) {
+                let respuesta = await peticion(url);
+                Swal.fire(respuesta, '', 'success').then(() => {
+                    window.location.reload();
+                })
+            }
+        })
+    }
+
+    /*  Hacer una peticion para eliminar  */
+    let peticion = async (url) => {
+        let resultado = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow'
+        })
+        return resultado.json();
+    }
+
+    let productos;
 
     $(document).ready(() => {
         productos = $('table tr').slice(1).toArray();
-
         $('#buscar').keyup(() => {
             let cadena = $('#buscar').val();
-            filtrar(cadena);
-        })
-
-        $('#imprimir').click(() => {
-            $('.mostrar').hide();
-            $('table').addClass('table');
-
-            var contentImprimir = $('#area').html();
-            $('body').html(contentImprimir);
-
-            window.print();
-            window.location.reload()
-            return false
+            filtrar(cadena.toUpperCase());
         })
     })
 
+    /* establece el alto para el scroll de la tabla */
+    $(document).ready(function () {
+        var height = $(window).height();
+        /* asigna el alto al id scroll */
+        $('#scroll').height(height - 245);
+    });
+
     let filtrar = (cadena) => {
         let regex = new RegExp(cadena);
-
         $('table tr').slice(1).each(function () {
-            let item = $(this).find('td:eq(0)').text();
+            let item = $(this).find('td:eq(1)').text().toUpperCase();
             if (!item.match(regex)) {
                 $(this).hide();
             } else {
@@ -81,4 +118,15 @@
         })
     }
 
+    $('#imprimir').click(() => {
+        $('.mostrar').hide();
+        $('table').addClass('table');
+        var titleImprimir = $('.inventario');
+        var contentImprimir = $('.area').html();
+        $('body').html(titleImprimir);
+        $('body').append(contentImprimir);
+        window.print();
+        window.location.reload();
+        return false
+    })
 </script>
